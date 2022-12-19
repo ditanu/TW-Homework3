@@ -27,10 +27,7 @@ let FoodItem = sequelize.define(
 
 const app = express();
 // TODO
-// app.post('/food-items', async(req, res) => {
-
-// })
-
+app.use(express.json());
 app.get("/create", async (req, res) => {
   try {
     await sequelize.sync({ force: true });
@@ -59,22 +56,19 @@ app.get("/food-items", async (req, res) => {
   }
 });
 
-app.post("/food-items", async (req, res) => {
+app.post("/food-items", async (req, res, next) => {
   try {
     // TODO
     if (Object.keys(req.body).length == 0) {
-      //   res.status(400).json({ message: "body is missing" });
-      throw { message: "body is missing" };
+      res.status(400).json({ message: "body is missing" });
     }
 
     if (!req.body.name || !req.body.category || !req.body.calories) {
-      //   res.status(400).json({ message: "malformed request" });
-      throw { message: "malformed request" };
+      res.status(400).json({ message: "malformed request" });
     }
 
     if (req.body.calories < 0) {
-      //   res.status(400).json({ message: "calories should be a positive number" });
-      throw { message: "calories should be a positive number" };
+      res.status(400).json({ message: "calories should be a positive number" });
     }
 
     if (
@@ -82,8 +76,7 @@ app.post("/food-items", async (req, res) => {
       req.body.category !== "DAIRY" &&
       req.body.category !== "VEGETABLE"
     ) {
-      //   res.status(400).json({ message: "not a valid category" });
-      throw { message: "not a valid category" };
+      res.status(400).json({ message: "not a valid category" });
     }
 
     let foodItem = new FoodItem({
@@ -97,7 +90,7 @@ app.post("/food-items", async (req, res) => {
       message: "created",
     });
   } catch (err) {
-    res.status(500).json({ message: "server error" });
+    next(err);
   }
 });
 
